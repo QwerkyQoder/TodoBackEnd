@@ -15,5 +15,6 @@ router.put("/delTask/:id",delTaskController)
 
 
 router.post("/register", register);
+router.post("/login", login)
 
 module.exports = router;
