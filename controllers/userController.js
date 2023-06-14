@@ -1,21 +1,16 @@
 const User = require('../model/User')
 const asyncHandler = require("../middleware/asyncHandler")
 const CustomError = require("../utils/CustomError")
-const tokenList = []
 
 const cookieOptions = {
     // expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
     httpOnly: true,
-    //could be in a separate file in utils
 }
+
+const tokenBlackList = [];
 
 exports.home = (req, res) => {
     res.send(" Welcome to TODO server")
-}
-
-exports.register =(req, res) => {
-    console.log("Register reached")
-    res.send(" Registration in progress")
 }
 
 exports.register = asyncHandler(async (req, res) => {
@@ -44,9 +39,6 @@ exports.register = asyncHandler(async (req, res) => {
     console.log("token", token)
     user.password = undefined
 
-    tokenList.push(token)
-    console.log("tokenList", tokenList)
-
     res.cookie("token", token, cookieOptions)
 
     res.status(200).json({
@@ -55,4 +47,66 @@ exports.register = asyncHandler(async (req, res) => {
         user
     })
 
+})
+
+
+exports.login = asyncHandler (async(req, res, next) => {
+    const {email, password} = req.body
+
+    console.log("LOGIN")
+
+    if(!email || !password) {
+        throw new CustomError ("please fill all fields", 400)
+    }
+
+    const user = await User.findOne({email}).select("+password -name")
+
+    if(!user) {
+        console.log("User not found", user)
+        throw new CustomError("Invalid credentials", 400)
+    }
+
+    const passwordMatch = await user.comparePassword(password)
+
+    if(!passwordMatch) {
+        console.log("Password missmatch")
+        throw new CustomError("Password mis match", 400)
+    }
+
+    const token = user.getJwtToken()
+    user.password - undefined
+    res.cookie("token" , token, cookieOptions)
+
+    return res.status(200).json({
+        success: true,
+        token,
+        user
+    })
+})
+
+exports.logout = asyncHandler (async(req, res, next) => {
+
+    console.log("LOGOUT")
+
+    if(tokenBlackList.includes(req.token))
+    {
+        res.status(400).json({
+            success: false,
+            message:"Already Logged out"
+        })
+    }
+
+    else {
+    tokenBlackList.push(req.token)
+
+    // res.clearCookie()
+    res.cookie("token", null, {
+        expires: new Date(Date.now()),
+        httpOnly:true,
+    })
+    res.status(200).json({
+        success: true,
+        message:"Logged out"
+    })
+    }
 })
