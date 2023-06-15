@@ -7,7 +7,7 @@ const { isLoggedIn } = require("../middleware/authentication");
 
 
 router.get("/", home)
-router.post("/createTodo", createTodoController);
+router.post("/createTodo", isLoggedIn, createTodoController);
 router.put("/createTask/:id", createTaskController)
 router.get("/getTodos", getTodosController)
 router.delete("/deleteTodo/:id", delTodoController)

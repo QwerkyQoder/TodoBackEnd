@@ -1,6 +1,7 @@
 const mongoose = require("mongoose")
 const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
+const Todo = require("../model/Todo").schema
 
 const userSchema = mongoose.Schema(
     {
@@ -20,6 +21,8 @@ const userSchema = mongoose.Schema(
             minLength: [8, "password must be at least 8 characters"],
             select: false
         },
+        todoList: [Todo]
+        ,
     },
     {
         timestamps: true

@@ -1,4 +1,5 @@
 const Todo = require("../model/Todo");
+const User = require("../model/User");
 
 
 exports.getTodosController = async(req, res) => {
@@ -23,9 +24,15 @@ exports.createTodoController = async (req,res) => {
     const {title, tasks} = req.body
     console.log(req.body)
     try {
-        const newTodo = await Todo.create ({title, tasks})
-        console.log(newTodo)
-        res.json(newTodo)        
+        // const newTodo = await Todo.create ({title, tasks})
+        // console.log(newTodo)
+        const user = await User.findById(req.user._id)
+        // console.log(user.todoList.find({$elemMatch: {title}}))
+        const newTodo = await user.todoList.push ({title, tasks})
+        // user.todoList.push(Todo)    
+        // console.log(newTodo)
+        await user.save()     
+        res.json(newTodo)
     } catch (error) {
         console.log(error.message)   
     }
