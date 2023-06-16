@@ -31,14 +31,16 @@ exports.createTodoController = async (req,res) => {
         const dup = user.todoList.filter(function (entry) { return entry.title === title; })
         console.log("duplicates", dup)
         if(dup.length > 0) {
-            console.log("Duplicate entry")
+            console.log("Duplicate entry", dup)
             // throw new CustomError('Duplicate Todo Entry', 400)  
-            res.status(401).json({
-                success: false,
-                message: "Duplicate"})
+            dup[0].tasks.addToSet(tasks)
+            await user.save()     
+            res.status(201).json({
+                success: true,
+                message: "Duplicate Todo- merging tasks"})
         }
         else {
-        const newTodo = await user.todoList.push ({title, tasks})
+        const newTodo = await user.todoList.addToSet(text) ({title, tasks})
         // user.todoList.push(Todo)    
         // console.log(newTodo)
         await user.save()     
