@@ -8,11 +8,11 @@ const { isLoggedIn } = require("../middleware/authentication");
 
 router.get("/", home)
 router.post("/createTodo", isLoggedIn, createTodoController);
-router.put("/createTask/:id", createTaskController)
-router.get("/getTodos", getTodosController)
-router.delete("/deleteTodo/:id", delTodoController)
-router.put("/editTodo/:id", editTodosController)
-router.put("/delTask/:id",delTaskController)
+router.put("/createTask/:id", isLoggedIn, createTaskController)
+router.get("/getTodos", isLoggedIn, getTodosController)
+router.delete("/deleteTodo/:id", isLoggedIn, delTodoController)
+router.put("/editTodo/:id", isLoggedIn, editTodosController)
+router.put("/delTask/:id",isLoggedIn, delTaskController)
 
 
 router.post("/register", register);
