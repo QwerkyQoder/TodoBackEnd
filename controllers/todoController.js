@@ -1,6 +1,6 @@
 const Todo = require("../model/Todo");
 const User = require("../model/User");
-
+const CustomError = require("../utils/CustomError")
 
 exports.getTodosController = async(req, res) => {
     // const {todoId} = req.params
@@ -28,11 +28,22 @@ exports.createTodoController = async (req,res) => {
         // console.log(newTodo)
         const user = await User.findById(req.user._id)
         // console.log(user.todoList.find({$elemMatch: {title}}))
+        const dup = user.todoList.filter(function (entry) { return entry.title === title; })
+        console.log("duplicates", dup)
+        if(dup.length > 0) {
+            console.log("Duplicate entry")
+            // throw new CustomError('Duplicate Todo Entry', 400)  
+            res.status(401).json({
+                success: false,
+                message: "Duplicate"})
+        }
+        else {
         const newTodo = await user.todoList.push ({title, tasks})
         // user.todoList.push(Todo)    
         // console.log(newTodo)
         await user.save()     
         res.json(newTodo)
+        }
     } catch (error) {
         console.log(error.message)   
     }
