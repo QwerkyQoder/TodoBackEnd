@@ -52,18 +52,60 @@ exports.createTodoController = async (req,res) => {
 }
 
 exports.editTodosController = async(req, res) => {
-    const todo = await Todo.findByIdAndUpdate(req.params.id, req.body)
-        res.status(200).json({
-            success:true,
-            message: "User updated"
-        })
+    // const todo = await Todo.findByIdAndUpdate(req.params.id, req.body)
     console.log("In EdittTodo")
+    try {
+        console.log(req.user._id, req.params.id)
+        const user = await User.findById(req.user._id)
+        console.log(user.todoList)
+        // const dup = user.todoList.filter(function (entry) { 
+        //     console.log(entry._id, mongoose.Types.ObjectId(req.params.id))
+        //     return entry._id == mongoose.Types.ObjectId(req.params.id); })
+        const dup = await User.findOneAndUpdate(
+            {
+            "_id": req.user._id,
+            "todoList": {
+                    $elemMatch: {"_id": mongoose.Types.ObjectId(req.params.id)}}
+            },
+            {$set:
+                { "todoList.$.title" : req.body.title}
+            },
+            {
+                new: false,
+                upsert: false
+            }
+            )
+        console.log("REturn", dup)
+        if(dup) {
+            console.log("change Todo entry", dup)
+            // dup[0].title = req.body.title
+            // await user.save()     
+            res.status(200).json({
+                success:true,
+                message: "Todo updated"
+            })
+        }
+        else
+        {
+            res.status(401).json({
+                success: false,
+                message: "Todo not found"
+            })
+        }
+    } catch (error) {
+        console.log(error.message) 
+        res.status(401).json({
+            success: false,
+            message: "Todo not found"
+        })
+    }
+
     // res.json(todo)
 } 
 
 exports.delTodoController = async (req, res) => {
     console.log("TODO DELETE CONTROLLER")
-    console.log(req.user._id)
+    console.log(req.user._id, req.params.id)
     // const user = await User.findById(req.user._id)
     const delTodo = await User.findByIdAndUpdate(req.user._id,
         {$pull: {"todoList":{"_id": mongoose.Types.ObjectId(req.params.id)}}})
