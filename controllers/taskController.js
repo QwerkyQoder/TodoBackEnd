@@ -23,7 +23,7 @@ exports.createTaskController =  async  (req,res) => {
         }
         )
     console.log("REturn", todo)
-    if(todo.length === 0) {
+    if(!todo) {
 
     // const todo = await Todo.findById(todoId)
     // if(!todo)
@@ -40,20 +40,41 @@ exports.delTaskController = async(req, res) => {
     // const todo = await Todo.findByIdAndUpdate(req.params.id, req.body)
     console.log("Delete Task")
     console.log(req.body)
-    const todo = await Todo.findById(req.params.id).select("tasks");
-    // console.log(todo)
+    // const todo = await Todo.findById(req.params.id).select("tasks");
+    // // console.log(todo)
 
-    const istask = (element) => element == req.body.task;
+    // const istask = (element) => element == req.body.task;
 
-    const index = todo.tasks.findIndex(istask);
-    console.log(index)
+    // const index = todo.tasks.findIndex(istask);
+    // console.log(index)
 
-    if (index != -1) {
-        todo.tasks.splice(index, 1);
-        await todo.save();
-                res.status(200).json({
-                    success:true,
-                    message: "User updated"
-                })    
+    // if (index != -1) {
+    //     todo.tasks.splice(index, 1);
+    //     await todo.save();
+    //             res.status(200).json({
+    //                 success:true,
+    //                 message: "User updated"
+    //             })    
+    // }
+    const todo = await User.findOneAndUpdate(
+        {"_id": req.user._id,
+        "todoList": {
+            $elemMatch: {"_id": mongoose.Types.ObjectId(req.params.id)}}
+        },
+        {$pull:
+            { "todoList.$.tasks" : req.body.text}
+        },
+        {
+            new: false,
+            upsert: false
+        }
+        )
+    console.log("REturn", todo)
+    if(!todo) {
+
+    // const todo = await Todo.findById(todoId)
+    // if(!todo)
+     return res.status(400).send("Todo does not exists")
     }
+    res.json(todo)
 } 
