@@ -1,4 +1,5 @@
 const User = require('../model/User')
+const BlockList = require("../model/Logout")
 const asyncHandler = require("../middleware/asyncHandler")
 const CustomError = require("../utils/CustomError")
 
@@ -88,25 +89,20 @@ exports.logout = asyncHandler (async(req, res, next) => {
 
     console.log("LOGOUT")
 
-    if(tokenBlackList.includes(req.token))
-    {
-        res.status(400).json({
-            success: false,
-            message:"Already Logged out"
+
+        const newBlacklist = new BlockList({
+            token: req.token,
+          });
+          await newBlacklist.save();
+
+        res.clearCookie()
+        res.cookie("token", null, {
+            expires: new Date(Date.now()),
+            httpOnly:true,
         })
-    }
-
-    else {
-    tokenBlackList.push(req.token)
-
-    // res.clearCookie()
-    res.cookie("token", null, {
-        expires: new Date(Date.now()),
-        httpOnly:true,
-    })
-    res.status(200).json({
-        success: true,
-        message:"Logged out"
-    })
-    }
+        res.status(200).json({
+            success: true,
+            message:"Logged out"
+        })
+    
 })

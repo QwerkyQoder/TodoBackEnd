@@ -1,4 +1,5 @@
 User = require('../model/User')
+const BlockList = require("../model/Logout")
 JWT = require('jsonwebtoken')
 asyncHandler = require('../middleware/asyncHandler')
 CustomError = require('../utils/CustomError')
@@ -19,6 +20,10 @@ exports.isLoggedIn = asyncHandler(async(req, res, next) => {
         console.log("No token")
         throw new CustomError("Not authorized to access", 401)
     }
+
+    const checkIfBlacklisted = await BlockList.findOne({ token: token }); // Check if that token is blacklisted
+    // if true, send a no content response.
+    if (checkIfBlacklisted) return res.sendStatus(401);
 
     try {
         const decJWTpayload = JWT.verify(token, process.env.JWT_SECRET);
