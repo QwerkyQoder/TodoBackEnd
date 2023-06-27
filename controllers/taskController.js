@@ -62,7 +62,7 @@ exports.delTaskController = async(req, res) => {
             $elemMatch: {"_id": mongoose.Types.ObjectId(req.params.id)}}
         },
         {$pull:
-            { "todoList.$.tasks" : req.body.text}
+            { "todoList.$.tasks" : req.body.task}
         },
         {
             new: false,
