@@ -22,8 +22,10 @@ exports.register = asyncHandler(async (req, res) => {
     if (!username || !email || !password) {
         throw new CustomError('Please fill all fields', 400)
     }
+    
     //check if user exists
     const existingUser = await User.findOne({email})
+    console.log(existingUser)
 
     if (existingUser) {
         throw new CustomError('User already exists', 400)  
